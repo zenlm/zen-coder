@@ -1,126 +1,214 @@
-# Zen Coder
+---
+license: apache-2.0
+language:
+- en
+tags:
+- zen
+- zen-lm
+- code
+- coding
+- agentic
+- moe
+library_name: transformers
+pipeline_tag: text-generation
+---
 
-Code-focused language model family from [Zen LM](https://zenlm.org).
+<p align="center">
+  <img src="https://zenlm.org/logo.png" width="300"/>
+</p>
 
-Zen Coder is a family of models purpose-built for software engineering tasks: code generation, completion, debugging, refactoring, and agentic coding workflows.
+<h1 align="center">Zen Coder</h1>
 
-## Model Variants
+<p align="center">
+  <strong>Agentic coding AI by Zen LM — from edge to frontier</strong>
+</p>
 
-| Model | Parameters | Context | Use Case |
-|-------|-----------|---------|----------|
-| **zen-coder** | 4B | 128K | Edge / local development |
-| **zen-coder-flash** | 31B MoE (3B active) | 131K | Balanced performance |
-| **zen-coder-max** | 671B MoE (14B active) | 128K | Frontier coding |
+<p align="center">
+  🤗 <a href="https://huggingface.co/zenlm/zen-coder-480b-instruct">HuggingFace</a> &nbsp;|&nbsp;
+  📖 <a href="https://zenlm.org">Docs</a> &nbsp;|&nbsp;
+  💻 <a href="https://github.com/zenlm">GitHub</a>
+</p>
 
-## Features
+---
 
-- 128K context window for large codebases
-- 92+ programming languages
-- Fill-in-the-middle (FIM) completion
-- Native function calling and tool use
-- Strong math and reasoning alongside code
+## Introduction
 
-## Special Tokens
+**Zen Coder** is Zen LM's family of code-focused AI models, spanning three capability tiers from edge deployment to frontier performance. The flagship model, `zen-coder-480b-instruct`, is a 480B-parameter Mixture of Experts (MoE) model with 35B active parameters, delivering state-of-the-art results on agentic coding, browser-use, and tool-use benchmarks.
 
-```json
-{
-  "<|fim_prefix|>": 151659,
-  "<|fim_middle|>": 151660,
-  "<|fim_suffix|>": 151661,
-  "<|fim_pad|>": 151662,
-  "<|repo_name|>": 151663,
-  "<|file_sep|>": 151664,
-  "<|im_start|>": 151644,
-  "<|im_end|>": 151645
-}
-```
+## Model Family
+
+| Model | Parameters | Active | Context | Use Case |
+|-------|------------|--------|---------|----------|
+| [zen-coder-480b-instruct](https://huggingface.co/zenlm/zen-coder-480b-instruct) | 480B MoE | 35B | 256K | Frontier agentic coding |
+| [zen-coder-flash](https://huggingface.co/zenlm/zen-coder-flash) | 31B MoE | 3B | 131K | Balanced performance |
+| [zen-coder](https://huggingface.co/zenlm/zen-coder) | 4B | 4B | 32K | Edge / mobile |
+
+## Highlights
+
+- **Agentic coding**: state-of-the-art on SWE-bench, comparable to frontier closed models
+- **256K context**: native support, extendable to 1M tokens via Yarn — handles full repository scale
+- **358 programming languages**: full spectrum from ABAP to Zig
+- **Fill-in-the-middle (FIM)**: code insertion at the cursor position
+- **Function calling**: structured tool-use with a dedicated tool parser
+- **Long-context reasoning**: extended chain-of-thought for complex engineering tasks
 
 ## Quick Start
 
-### Requirements
+### Install
 
-```
-python>=3.9
-transformers>=4.37.0
+```bash
+pip install transformers torch
 ```
 
-### Inference
+### Chat with Zen Coder (480B Flagship)
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_id = "zenlm/zen-coder"
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
+model_name = "zenlm/zen-coder-480b-instruct"
 
-messages = [{"role": "user", "content": "Write a binary search in Python."}]
-text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-inputs = tokenizer(text, return_tensors="pt").to(model.device)
-outputs = model.generate(**inputs, max_new_tokens=512)
-print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-```
-
-### Fill-in-the-Middle
-
-```python
-prompt = "<|fim_prefix|>def fibonacci(n):\n    <|fim_suffix|>\n    return result<|fim_middle|>"
-inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-outputs = model.generate(**inputs, max_new_tokens=128)
-print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-```
-
-### vLLM (Production)
-
-```bash
-pip install vllm
-vllm serve zenlm/zen-coder --port 8000
-```
-
-```python
-from openai import OpenAI
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="zen")
-response = client.chat.completions.create(
-    model="zenlm/zen-coder",
-    messages=[{"role": "user", "content": "Implement a binary heap in Go."}],
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    torch_dtype="auto",
+    device_map="auto"
 )
-print(response.choices[0].message.content)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+prompt = "Write a quicksort algorithm in Python with type hints."
+messages = [{"role": "user", "content": prompt}]
+
+text = tokenizer.apply_chat_template(
+    messages,
+    tokenize=False,
+    add_generation_prompt=True
+)
+model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+
+generated_ids = model.generate(**model_inputs, max_new_tokens=4096)
+generated_ids = [
+    output_ids[len(input_ids):]
+    for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+]
+
+response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+print(response)
 ```
 
-### Ollama
+### Fill-in-the-Middle (FIM)
 
-```bash
-ollama run zenlm/zen-coder
+```python
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+model_name = "zenlm/zen-coder-480b-instruct"
+
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto").eval()
+
+# Structure: prefix + suffix + middle token
+input_text = """<|fim_prefix|>def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    <|fim_suffix|>
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)<|fim_middle|>"""
+
+messages = [
+    {"role": "system", "content": "You are a code completion assistant."},
+    {"role": "user", "content": input_text}
+]
+
+text = tokenizer.apply_chat_template(
+    messages,
+    tokenize=False,
+    add_generation_prompt=True
+)
+model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+
+eos_token_ids = [151659, 151661, 151662, 151663, 151664, 151643, 151645]
+generated_ids = model.generate(
+    model_inputs.input_ids,
+    max_new_tokens=512,
+    do_sample=False,
+    eos_token_id=eos_token_ids
+)[0]
+
+output_text = tokenizer.decode(
+    generated_ids[len(model_inputs.input_ids[0]):],
+    skip_special_tokens=True
+)
+print(output_text)
 ```
 
-## Quantized Formats
+### Edge Deployment (4B Model)
 
-| Format | Size | Download |
-|--------|------|----------|
-| SafeTensors (BF16) | ~8 GB | [HuggingFace](https://huggingface.co/zenlm/zen-coder) |
-| GGUF Q4_K_M | ~2.5 GB | [HuggingFace](https://huggingface.co/zenlm/zen-coder) |
-| GGUF Q8_0 | ~4.5 GB | [HuggingFace](https://huggingface.co/zenlm/zen-coder) |
-| AWQ Int4 | ~2.5 GB | [HuggingFace](https://huggingface.co/zenlm/zen-coder) |
-| GPTQ Int4 | ~2.5 GB | [HuggingFace](https://huggingface.co/zenlm/zen-coder) |
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-## Supported Languages
+model_name = "zenlm/zen-coder"  # 4B, 32K context
 
-Ada, Agda, Assembly, Awk, Bash, C, C#, C++, Clojure, CMake, CoffeeScript, CSS, CUDA, Dart,
-Dockerfile, Elixir, Elm, Erlang, F#, Fortran, GLSL, Go, Groovy, Haskell, HTML, Java, JavaScript,
-JSON, Julia, Jupyter, Kotlin, Lean, Lua, Makefile, Markdown, MATLAB, OCaml, Pascal, Perl, PHP,
-PowerShell, Prolog, Python, R, Racket, Ruby, Rust, Scala, Scheme, Solidity, SQL, Swift,
-SystemVerilog, TCL, TypeScript, VHDL, Vue, YAML, Zig, and 30+ more.
+model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-## Agentic Use
+messages = [{"role": "user", "content": "Write a binary search in Rust."}]
+text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
-Zen Coder is optimized for use with [Zen Agent](https://github.com/zenlm/zen-agent) for multi-step
-coding tasks, repository-level refactoring, and automated debugging.
+output = model.generate(**inputs, max_new_tokens=1024)
+print(tokenizer.decode(output[0][len(inputs.input_ids[0]):], skip_special_tokens=True))
+```
 
-## Links
+## Supported Languages (358 total)
 
-- Models: [huggingface.co/zenlm](https://huggingface.co/zenlm)
-- Agent framework: [github.com/zenlm/zen-agent](https://github.com/zenlm/zen-agent)
-- Docs: [zenlm.org](https://zenlm.org)
+```
+ABAP, ActionScript, Ada, Agda, Alloy, ApacheConf, AppleScript, Arduino,
+Assembly, Awk, Batchfile, C, C#, C++, COBOL, CSS, Clojure, CoffeeScript,
+Dart, Dockerfile, Elixir, Elm, Erlang, F#, FORTRAN, Go, GraphQL, Groovy,
+HTML, Haskell, Java, JavaScript, Julia, Kotlin, Lua, Makefile, Markdown,
+NSIS, Nginx, OCaml, Objective-C, PHP, Pascal, Perl, PowerShell, Prolog,
+Python, R, Racket, Ruby, Rust, SQL, Scala, Shell, Solidity, Swift,
+TypeScript, VHDL, Verilog, Vue, WebAssembly, YAML, Zig, and 300+ more
+```
+
+## Performance Benchmarks
+
+| Benchmark | zen-coder-480b | zen-coder-flash |
+|-----------|---------------|-----------------|
+| SWE-bench Verified | State-of-the-art | 59.2% |
+| AIME 2025 | Competitive | 91.6% |
+| GPQA | Competitive | 75.2% |
+| t²-Bench | Competitive | 79.5% |
+
+## Hardware Requirements
+
+| Model | VRAM | Notes |
+|-------|------|-------|
+| zen-coder (4B) | 8GB | Full precision, single GPU |
+| zen-coder-flash (31B MoE) | 24GB | Efficient MoE, 3B active |
+| zen-coder-480b-instruct | 8x 80GB | Tensor parallel recommended |
 
 ## License
 
-Apache 2.0 — Copyright 2024 Zen LM Authors
+Apache 2.0
+
+## Citation
+
+```bibtex
+@misc{zenlm2025zen-coder,
+    title={Zen Coder: Agentic Coding AI by Zen LM},
+    author={Hanzo AI and Zoo Labs Foundation},
+    year={2025},
+    publisher={HuggingFace},
+    howpublished={\url{https://huggingface.co/zenlm/zen-coder-480b-instruct}}
+}
+```
+
+---
+
+<p align="center">
+  <strong>Zen LM by Hanzo AI</strong> - Clarity Through Intelligence<br>
+  <a href="https://zenlm.org">zenlm.org</a> &nbsp;|&nbsp;
+  <a href="https://huggingface.co/zenlm">HuggingFace</a> &nbsp;|&nbsp;
+  <a href="https://github.com/zenlm">GitHub</a>
+</p>
