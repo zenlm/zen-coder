@@ -1,0 +1,51 @@
+# AutoTrain Config: Devstral Small 2 (24B) - Apache 2.0 License
+# Best coding model for fine-tuning - 256K context
+# Run: autotrain llm --config devstral_small_24b_config.yaml
+
+task: llm-sft
+log: tensorboard
+
+# Model - Devstral Small 2 (24B, Apache 2.0)
+base_model: mistralai/Devstral-Small-2-24B-Instruct-2512
+
+# Dataset
+data_path: hanzoai/zen-agentic-dataset
+train_split: train
+valid_split: valid
+chat_template: mistral  # Mistral chat format
+
+# Column mapping
+column_mapping:
+  text_column: messages
+
+# Training - optimized for 24B model
+learning_rate: 1e-5  # Lower LR for larger model
+num_epochs: 2
+batch_size: 1  # Smaller batch for 24B
+gradient_accumulation: 8  # Effective batch = 8
+block_size: 8192  # Devstral supports 256K, use 8K for training
+warmup_ratio: 0.05
+weight_decay: 0.01
+max_grad_norm: 1.0
+
+# LoRA - essential for 24B model
+peft: true
+quantization: int4  # QLoRA - required for 24B on consumer GPUs
+lora_r: 32  # Lower rank for larger model
+lora_alpha: 64
+lora_dropout: 0.05
+target_modules: all-linear
+
+# Optimization
+mixed_precision: bf16
+gradient_checkpointing: true
+
+# Output
+project_name: zen-coder-devstral-small-24b
+push_to_hub: false
+# hub_model_id: zenlm/zen-coder-devstral-24b-instruct
+
+# Memory requirements:
+# - Full precision: ~96GB VRAM
+# - QLoRA (int4): ~24GB VRAM (fits on RTX 4090, A100)
+# - For M3 Max 64GB: Use MLX instead of AutoTrain

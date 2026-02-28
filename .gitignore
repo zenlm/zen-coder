@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.DS_Store
+.gitconfig
+
 # C extensions
 *.so
 
@@ -158,3 +161,34 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+
+
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+GROK.md
+QWEN.md
+
+# Training data (stored on HuggingFace)
+*.jsonl
+train.jsonl
+valid.jsonl
+
+# Model files (large binaries - use HuggingFace)
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.pth
+*.ckpt
+*.npz
+
+# AI assistant symlinks (local only)
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+QWEN.md
+
+# MLX model directories
+zen-coder-4b-mlx/model-*.safetensors

@@ -2,11 +2,10 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 device = "cuda" # the device to load the model onto
 
 # Now you do not need to add "trust_remote_code=True"
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-Coder-7B")
-model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-Coder-7B", device_map="auto").eval()
+tokenizer = AutoTokenizer.from_pretrained("zenlm/zen-coder")
+model = AutoModelForCausalLM.from_pretrained("zenlm/zen-coder", device_map="auto").eval()
 
 # tokenize the input into tokens
-# set fim format into the corresponding file you need to infilling
 input_text = """<|repo_name|>library-system
 <|file_sep|>library.py
 class Book:
@@ -58,7 +57,7 @@ class Student:
         return False
 
 <|file_sep|>main.py
-<|fim_prefix|>from library import Library
+from library import Library
 from student import Student
 
 def main():
@@ -70,25 +69,7 @@ def main():
     # Set up a student
     student = Student("Alice", "S1")
     
-    # Student borrows a book<|fim_suffix|>
-    if student.borrow_book(book, library):
-        print(f"{student.name} borrowed {book.title}")
-    else:
-        print(f"{student.name} could not borrow {book.title}")
-        
-    # Student returns a book
-    if student.return_book(book, library):
-        print(f"{student.name} returned {book.title}")
-    else:
-        print(f"{student.name} could not return {book.title}")
-    
-    # List all books in the library
-    print("All books in the library:")
-    for book in library.list_books():
-        print(book)
-
-if __name__ == "__main__":
-    main()<|fim_middle|>
+    # Student borrows a book
 """
 model_inputs = tokenizer([input_text], return_tensors="pt").to(device)
 
@@ -104,4 +85,23 @@ print(f"Prompt: \n{input_text}\n\nGenerated text: \n{output_text.split('<|file_s
 """
 Generated text:
     book = library.find_book("1234567890")
+    if student.borrow_book(book, library):
+        print(f"{student.name} borrowed {book.title}")
+    else:
+        print(f"{student.name} could not borrow {book.title}")
+    
+    # Student returns a book
+    if student.return_book(book, library):
+        print(f"{student.name} returned {book.title}")
+    else:
+        print(f"{student.name} could not return {book.title}")
+    
+    # List all books in the library
+    print("All books in the library:")
+    for book in library.list_books():
+        print(book)
+
+if __name__ == "__main__":
+    main()
+
 """

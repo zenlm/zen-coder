@@ -1,0 +1,12 @@
+{
+  "started": "2025-12-30T11:42:15.952916",
+  "iteration": 420,
+  "total_iterations": 837500,
+  "samples_processed": 0,
+  "total_samples": 3349411,
+  "loss": 1.068,
+  "eta": "2026-02-03T19:54:40.379687",
+  "status": "running",
+  "last_checkpoint": null,
+  "cumulative_iterations": 0
+}
