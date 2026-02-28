@@ -1,0 +1,54 @@
+# AutoTrain Config: Qwen3 4B (Test Run)
+# Install: pip install autotrain-advanced
+# Run: autotrain llm --config qwen3_4b_config.yaml
+
+task: llm-sft
+log: tensorboard
+
+# Model
+base_model: Qwen/Qwen3-4B-Instruct-2507
+
+# Dataset - from HuggingFace (once upload completes)
+data_path: hanzoai/zen-agentic-dataset
+train_split: train
+valid_split: valid
+chat_template: chatml
+
+# OR use local data:
+# data_path: /Users/z/work/zen/zen-agentic-dataset
+# train_split: train.jsonl
+# valid_split: valid.jsonl
+
+# Column mapping
+column_mapping:
+  text_column: messages
+
+# Training
+learning_rate: 2e-5
+num_epochs: 1  # Test run - increase to 3 for full training
+batch_size: 2
+gradient_accumulation: 4
+block_size: 4096
+warmup_ratio: 0.03
+weight_decay: 0.01
+max_grad_norm: 1.0
+
+# LoRA
+peft: true
+quantization: null  # or "int4" for QLoRA
+lora_r: 64
+lora_alpha: 128
+lora_dropout: 0.05
+target_modules: all-linear
+
+# Optimization
+mixed_precision: bf16
+gradient_checkpointing: true
+
+# Output
+project_name: zen-coder-4b-qwen3-test
+push_to_hub: false  # Set true to push trained model
+# hub_model_id: zenlm/zen-coder-4b-instruct
+
+# Hardware detection
+# Will auto-detect: MPS (Apple), CUDA (NVIDIA), CPU

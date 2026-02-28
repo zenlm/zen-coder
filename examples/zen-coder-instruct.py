@@ -3,8 +3,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 device = "cuda" # the device to load the model onto
 
 # Now you do not need to add "trust_remote_code=True"
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-Coder-7B-Instruct")
-model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-Coder-7B-Instruct", device_map="auto").eval()
+tokenizer = AutoTokenizer.from_pretrained("zenlm/zen-coder")
+model = AutoModelForCausalLM.from_pretrained("zenlm/zen-coder", device_map="auto").eval()
 
 # tokenize the input into tokens
 
@@ -12,7 +12,7 @@ model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-Coder-7B-Instruct", d
 # But you need to use tokenizer.apply_chat_template() to format your inputs as shown below
 prompt = "write a quick sort algorithm."
 messages = [
-    {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."},
+    {"role": "system", "content": "You are Zen. You are a helpful assistant."},
     {"role": "user", "content": prompt}
 ]
 text = tokenizer.apply_chat_template(
