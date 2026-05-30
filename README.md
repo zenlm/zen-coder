@@ -24,7 +24,7 @@ pipeline_tag: text-generation
 </p>
 
 <p align="center">
-  🤗 <a href="https://huggingface.co/zenlm/zen-coder-480b-instruct">HuggingFace</a> &nbsp;|&nbsp;
+  🤗 <a href="https://huggingface.co/zenlm/zen-5-coder-gguf">HuggingFace</a> &nbsp;|&nbsp;
   📖 <a href="https://zenlm.org">Docs</a> &nbsp;|&nbsp;
   💻 <a href="https://github.com/zenlm">GitHub</a>
 </p>
@@ -35,13 +35,33 @@ pipeline_tag: text-generation
 
 **Zen Coder** is Zen LM's family of code-focused AI models, spanning three capability tiers from edge deployment to frontier performance. The flagship model, `zen-coder-480b-instruct`, is a 480B-parameter Mixture of Experts (MoE) model with 35B active parameters, delivering state-of-the-art results on agentic coding, browser-use, and tool-use benchmarks.
 
-## Model Family
+## Model lineup
 
-| Model | Parameters | Active | Context | Use Case |
-|-------|------------|--------|---------|----------|
-| [zen-coder-480b-instruct](https://huggingface.co/zenlm/zen-coder-480b-instruct) | 480B MoE | 35B | 256K | Frontier agentic coding |
-| [zen-coder-flash](https://huggingface.co/zenlm/zen-coder-flash) | 31B MoE | 3B | 131K | Balanced performance |
-| [zen-coder](https://huggingface.co/zenlm/zen-coder) | 4B | 4B | 32K | Edge / mobile |
+### Zen5 chat ladder
+- `zen5-flash` — fastest tier
+- `zen5-mini` — balanced small
+- `zen5` — default
+- `zen5-coder` — code-specialized
+- `zen5-pro` — high-quality reasoning
+- `zen5-max` — flagship
+
+### Zen5 nano (edge)
+- `zen5-nano-0.8B`
+- `zen5-nano-2B`
+- `zen5-nano-4B`
+- `zen5-nano-9B`
+
+### Zen5 embedding
+- `zen5-embedding-0.6B`
+- `zen5-embedding-4B`
+- `zen5-embedding-8B`
+
+### Zen3 specialty
+- Multimodal: `zen3-omni`, `zen3-vl` (+ sizes), `zen3-web`
+- Audio (2026-05-30): `zen-3-asr`, `zen-3-asr-0.6B`, `zen-3-asr-aligner`, `zen-3-tts`, `zen-3-tts-0.6B`, `zen-3-tts-voice-design`, `zen-3-tts-custom-voice`
+- Safety: `zen3-guard`
+- Image: `zen3-image` family
+- Edge: `zen3-nano`
 
 ## Highlights
 
@@ -65,7 +85,7 @@ pip install transformers torch
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_name = "zenlm/zen-coder-480b-instruct"
+model_name = "zenlm/zen-5-coder-gguf"
 
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -99,7 +119,7 @@ print(response)
 ```python
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_name = "zenlm/zen-coder-480b-instruct"
+model_name = "zenlm/zen-5-coder-gguf"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto").eval()
@@ -146,7 +166,7 @@ print(output_text)
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_name = "zenlm/zen-coder"  # 4B, 32K context
+model_name = "zenlm/zen-5-coder-gguf"  # 4B, 32K context
 
 model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -200,7 +220,7 @@ Apache 2.0
     author={Hanzo AI and Zoo Labs Foundation},
     year={2025},
     publisher={HuggingFace},
-    howpublished={\url{https://huggingface.co/zenlm/zen-coder-480b-instruct}}
+    howpublished={\url{https://huggingface.co/zenlm/zen-5-coder-gguf}}
 }
 ```
 
