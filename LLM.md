@@ -2,14 +2,14 @@
 
 **Project**: zen-coder
 **Organization**: zenlm
-**Repository**: https://github.com/zenlm/zen-coder
-**HuggingFace**: https://huggingface.co/zenlm/zen-coder
+**Repository**: https://github.com/zenlm/zen-5-coder-gguf
+**HuggingFace**: https://huggingface.co/zenlm/zen-5-coder-gguf
 **Last Updated**: 2026-02-27
 
 ## Overview
 
 zen-coder is the code-focused model family from Zen LM. Models range from 4B (edge) to 480B (MoE frontier).
-Built on Qwen3-Coder architecture with extended context (128K tokens).
+Built on -Coder architecture with extended context (128K tokens).
 
 ## Model Variants
 
